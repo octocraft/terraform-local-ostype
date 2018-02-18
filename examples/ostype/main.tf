@@ -1,5 +1,5 @@
 module "os" {
-  source = "github.com/octocraft/terraform-local-ostype"
+  source = "git::https://github.com/octocraft/terraform-local-ostype?ref=v1.0.0"
 }
 
 output "type" {
