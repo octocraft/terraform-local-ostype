@@ -11,7 +11,7 @@ export PATH="$(./sbpl.sh envvars sbpl_path_bin):$PATH"
 
 # Check if Terraform is present
 if ! [ -x "$(command -v terraform 2>/dev/null)" ]; then
-    echo 'error: terraform not found in $PATH.'
+    echo 'error: terraform not found in $PATH'
     exit 2
 fi
 
@@ -31,6 +31,6 @@ fi
 
 ### Run Wine
 if command -v wine; then
-    wine cmd /c test.bat
+    wine cmd /c "set PATH=%cd%\\vendor\\bin\\windows\\386;%PATH% && test.bat"
 fi
 
