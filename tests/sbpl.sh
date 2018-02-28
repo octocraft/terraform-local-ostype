@@ -130,9 +130,9 @@ function sbpl_get () {
     url=$(eval "printf $4")
 
     if [ "$#" -ge 5 ]; then
-        pkg_bin_filter=$5
+        pkg_dir_bin=$(eval "printf $5")
     else
-        pkg_bin_filter=""
+        pkg_dir_bin=""
     fi
 
     # Update Locations
@@ -205,14 +205,17 @@ function sbpl_get () {
         if [ "$result" -eq 0 ]; then
             mkdir -p "$sbpl_dir_bin"
 
-            bin_filter="$pkg_bin_filter "
-            bin_path=${bin_filter%%" "*}
-            bin_filter=${bin_filter#*" "}
+            pkg_path_bin="$pkg_path/$pkg_dir_bin"
 
-            bin_files="$(eval "find $pkg_path/$bin_path -maxdepth 1 -type f -executable $bin_filter")"
-            bin_links="$(eval "find $pkg_path/$bin_path -maxdepth 1 -type l -executable $bin_filter")"
+            if [ -d "$pkg_path_bin" ]; then
+                pkg_path_bin="$pkg_path_bin/*"
+            fi
 
-            ln -sf $bin_files $bin_links "$sbpl_dir_bin/."
+            for f in $pkg_path_bin; do
+                if [ -f $f ] && [ -x $f ]; then
+                    ln -sf $f "$sbpl_dir_bin/."
+                fi
+            done
         else
             rm -rf $pkg_dir
         fi
