@@ -28,10 +28,7 @@ fi
 # Get Packages
 sbpl update
 
-# Include Packages
-export PATH="$PWD/vendor/bin/current:$PATH"
-
-# Test
-echo "Run Test"
+# Run Tests
+echo "Run Tests"
 tftest "outputs_nowine.diff" "outputs_wine.diff"
 
