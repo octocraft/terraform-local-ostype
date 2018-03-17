@@ -1,36 +1,37 @@
 #!/bin/bash
-
-# Get Packages
-./sbpl.sh
+set -eu
 
 # Include Packages
-export PATH="$(./sbpl.sh envvars sbpl_path_bin):$PATH"
+export PATH="$PWD/vendor:$PWD/vendor/bin/current:$PATH"
 
+# Check command
+function has_command () {
+    command -v "$1" &> /dev/null
+}
 
-### Run Test
+# Get Package Manager
+if ! has_command "sbpl"; then
+    echo "Get Package Manager"
 
-# Check if Terraform is present
-if ! [ -x "$(command -v terraform 2>/dev/null)" ]; then
-    echo 'error: terraform not found in $PATH'
-    exit 2
+    if has_command "curl"; then
+        function fetch () { curl -fSL# "$1" -o "$2"; }
+    elif has_command "wget"; then
+        function fetch () { wget --progress=bar -O "$2" "$1"; }
+    else
+        printf "Neither 'curl' nor 'wget' found\n" 1>&2; exit 2
+    fi
+
+    url="https://raw.githubusercontent.com/octocraft/sbpl/master/sbpl.sh"
+    mkdir -p vendor; fetch "$url" "vendor/sbpl"; chmod +x vendor/sbpl
 fi
 
-# Init Terraform
-if ! terraform init -input=false > /dev/null; then
-    echo "failed to init terraform" 
-    exit 1
-fi
+# Get Packages
+sbpl update
 
-# Check if value is queried correctly
-if terraform apply -auto-approve | grep "os_type = unix" > /dev/null; then
-    echo 'success'
-else
-    echo "fail"
-    exit 1
-fi
+# Include Packages
+export PATH="$PWD/vendor/bin/current:$PATH"
 
-### Run Wine
-if command -v wine; then
-    wine cmd /c "set PATH=%cd%\\vendor\\bin\\windows\\386;%PATH% && test.bat"
-fi
+# Test
+echo "Run Test"
+tftest "outputs_nowine.diff" "outputs_wine.diff"
 
